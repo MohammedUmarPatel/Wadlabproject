@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .section {
+            display: none;
+            background: rgba(255,255,255,0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.9);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .alert.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            background: rgba(255,255,255,0.9);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-btn {
+                width: 200px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Library Management System</h1>
+            <p>Complete Database Management Solution</p>
+        </div>
+
+        <div class="navigation">
+            <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
+            <button class="nav-btn" onclick="showSection('books')">Books</button>
+            <button class="nav-btn" onclick="showSection('members')">Members</button>
+            <button class="nav-btn" onclick="showSection('transactions')">Transactions</button>
+            <button class="nav-btn" onclick="showSection('reports')">Reports</button>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="section active">
+            <h2>📊 Dashboard</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalBooks">0</div>
+                    <div>Total Books</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalMembers">0</div>
+                    <div>Total Members</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="booksIssued">0</div>
+                    <div>Books Issued</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="overdueBooks">0</div>
+                    <div>Overdue Books</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Books Section -->
+        <div id="books" class="section">
+            <h2>📖 Book Management</h2>
+            
+            <div class="form-group">
+                <h3>Add New Book</h3>
+                <form id="bookForm">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div class="form-group">
+                            <label for="bookTitle">Book Title</label>
+                            <input type="text" id="bookTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookAuthor">Author</label>
+                            <input type="text" id="bookAuthor" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookISBN">ISBN</label>
+                            <input type="text" id="bookISBN" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookCategory">Category</label>
+                            <select id="bookCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Fiction">Fiction</option>
+                                <option value="Non-Fiction">Non-Fiction</option>
+                                <option value="Science">Science</option>
+                                <option value="Technology">Technology</option>
+                                <option value="History">History</option>
+                                <option value="Biography">Biography</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Add Book</button>
+                </form>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="bookSearch" placeholder="🔍 Search books by title, author, or ISBN...">
+            </div>
+
+            <div class="table-container">
+                <table id="booksTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>ISBN</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Members Section -->
+        <div id="members" class="section">
+            <h2>👥 Member Management</h2>
+            
+            <div class="form-group">
+                <h3>Add New Member</h3>
+                <form id="memberForm">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div class="form-group">
+                            <label for="memberName">Full Name</label>
+                            <input type="text" id="memberName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="memberEmail">Email</label>
+                            <input type="email" id="memberEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="memberPhone">Phone</label>
+                            <input type="tel" id="memberPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="memberType">Member Type</label>
+                            <select id="memberType" required>
+                                <option value="">Select Type</option>
+                                <option value="Student">Student</option>
+                                <option value="Faculty">Faculty</option>
+                                <option value="Public">Public</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Add Member</button>
+                </form>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="memberSearch" placeholder="🔍 Search members by name, email, or phone...">
+            </div>
+
+            <div class="table-container">
+                <table id="membersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Type</th>
+                            <th>Join Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Transactions Section -->
+        <div id="transactions" class="section">
+            <h2>📋 Transaction Management</h2>
+            
+            <div class="form-group">
+                <h3>Issue Book</h3>
+                <form id="transactionForm">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div class="form-group">
+                            <label for="transactionMember">Select Member</label>
+                            <select id="transactionMember" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="transactionBook">Select Book</label>
+                            <select id="transactionBook" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="issueDate">Issue Date</label>
+                            <input type="date" id="issueDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dueDate">Due Date</label>
+                            <input type="date" id="dueDate" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Issue Book</button>
+                </form>
+            </div>
+
+            <div class="table-container">
+                <table id="transactionsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Member</th>
+                            <th>Book</th>
+                            <th>Issue Date</th>
+                            <th>Due Date</th>
+                            <th>Return Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reports" class="section">
+            <h2>📈 Reports</h2>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Books by Category</h3>
+                    <div id="categoryReport"></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Member Statistics</h3>
+                    <div id="memberReport"></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Popular Books</h3>
+                    <div id="popularBooks"></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Overdue Report</h3>
+                    <div id="overdueReport"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database simulation using localStorage alternative (in-memory storage)
+        let libraryData = {
+            books: [],
+            members: [],
+            transactions: [],
+            nextBookId: 1,
+            nextMemberId: 1,
+            nextTransactionId: 1
+        };
+
+        // Initialize with sample data
+        function initializeSampleData() {
+            // Sample books
+            libraryData.books = [
+                {id: 1, title: "JavaScript: The Good Parts", author: "Douglas Crockford", isbn: "978-0596517748", category: "Technology", status: "Available"},
+                {id: 2, title: "Clean Code", author: "Robert Martin", isbn: "978-0132350884", category: "Technology", status: "Available"},
+                {id: 3, title: "The Great Gatsby", author: "F. Scott Fitzgerald", isbn: "978-0743273565", category: "Fiction", status: "Available"}
+            ];
+            
+            // Sample members
+            libraryData.members = [
+                {id: 1, name: "John Doe", email: "john@example.com", phone: "123-456-7890", type: "Student", joinDate: "2024-01-15"},
+                {id: 2, name: "Jane Smith", email: "jane@example.com", phone: "098-765-4321", type: "Faculty", joinDate: "2024-02-10"}
+            ];
+            
+            libraryData.nextBookId = 4;
+            libraryData.nextMemberId = 3;
+            libraryData.nextTransactionId = 1;
+        }
+
+        // Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            
+            // Add active class to clicked nav button
+            event.target.classList.add('active');
+            
+            // Update content based on section
+            if (sectionName === 'dashboard') updateDashboard();
+            else if (sectionName === 'books') displayBooks();
+            else if (sectionName === 'members') displayMembers();
+            else if (sectionName === 'transactions') {
+                displayTransactions();
+                updateTransactionSelects();
+            }
+            else if (sectionName === 'reports') generateReports();
+        }
+
+        // Alert system
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert ${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+        }
+
+        // Book Management
+        document.getElementById('bookForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const book = {
+                id: libraryData.nextBookId++,
+                title: document.getElementById('bookTitle').value,
+                author: document.getElementById('bookAuthor').value,
+                isbn: document.getElementById('bookISBN').value,
+                category: document.getElementById('bookCategory').value,
+                status: 'Available'
+            };
+            
+            libraryData.books.push(book);
+            showAlert('Book added successfully!');
+            this.reset();
+            displayBooks();
+            updateDashboard();
+        });
+
+        function displayBooks() {
+            const tbody = document.querySelector('#booksTable tbody');
+            tbody.innerHTML = '';
+            
+            libraryData.books.forEach(book => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${book.id}</td>
+                    <td>${book.title}</td>
+                    <td>${book.author}</td>
+                    <td>${book.isbn}</td>
+                    <td>${book.category}</td>
+                    <td><span style="color: ${book.status === 'Available' ? 'green' : 'red'}">${book.status}</span></td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteBook(${book.id})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteBook(id) {
+            if (confirm('Are you sure you want to delete this book?')) {
+                libraryData.books = libraryData.books.filter(book => book.id !== id);
+                displayBooks();
+                updateDashboard();
+                showAlert('Book deleted successfully!');
+            }
+        }
+
+        // Member Management
+        document.getElementById('memberForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const member = {
+                id: libraryData.nextMemberId++,
+                name: document.getElementById('memberName').value,
+                email: document.getElementById('memberEmail').value,
+                phone: document.getElementById('memberPhone').value,
+                type: document.getElementById('memberType').value,
+                joinDate: new Date().toISOString().split('T')[0]
+            };
+            
+            libraryData.members.push(member);
+            showAlert('Member added successfully!');
+            this.reset();
+            displayMembers();
+            updateDashboard();
+        });
+
+        function displayMembers() {
+            const tbody = document.querySelector('#membersTable tbody');
+            tbody.innerHTML = '';
+            
+            libraryData.members.forEach(member => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${member.id}</td>
+                    <td>${member.name}</td>
+                    <td>${member.email}</td>
+                    <td>${member.phone}</td>
+                    <td>${member.type}</td>
+                    <td>${member.joinDate}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteMember(${member.id})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteMember(id) {
+            if (confirm('Are you sure you want to delete this member?')) {
+                libraryData.members = libraryData.members.filter(member => member.id !== id);
+                displayMembers();
+                updateDashboard();
+                showAlert('Member deleted successfully!');
+            }
+        }
+
+        // Transaction Management
+        function updateTransactionSelects() {
+            const memberSelect = document.getElementById('transactionMember');
+            const bookSelect = document.getElementById('transactionBook');
+            
+            // Update member select
+            memberSelect.innerHTML = '<option value="">Select Member</option>';
+            libraryData.members.forEach(member => {
+                memberSelect.innerHTML += `<option value="${member.id}">${member.name}</option>`;
+            });
+            
+            // Update book select (only available books)
+            bookSelect.innerHTML = '<option value="">Select Book</option>';
+            libraryData.books.filter(book => book.status === 'Available').forEach(book => {
+                bookSelect.innerHTML += `<option value="${book.id}">${book.title}</option>`;
+            });
+        }
+
+        document.getElementById('transactionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const memberId = parseInt(document.getElementById('transactionMember').value);
+            const bookId = parseInt(document.getElementById('transactionBook').value);
+            
+            const transaction = {
+                id: libraryData.nextTransactionId++,
+                memberId: memberId,
+                bookId: bookId,
+                issueDate: document.getElementById('issueDate').value,
+                dueDate: document.getElementById('dueDate').value,
+                returnDate: null,
+                status: 'Issued'
+            };
+            
+            libraryData.transactions.push(transaction);
+            
+            // Update book status
+            const book = libraryData.books.find(b => b.id === bookId);
+            if (book) book.status = 'Issued';
+            
+            showAlert('Book issued successfully!');
+            this.reset();
+            displayTransactions();
+            updateTransactionSelects();
+            updateDashboard();
+        });
+
+        function displayTransactions() {
+            const tbody = document.querySelector('#transactionsTable tbody');
+            tbody.innerHTML = '';
+            
+            libraryData.transactions.forEach(transaction => {
+                const member = libraryData.members.find(m => m.id === transaction.memberId);
+                const book = libraryData.books.find(b => b.id === transaction.bookId);
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${transaction.id}</td>
+                    <td>${member ? member.name : 'Unknown'}</td>
+                    <td>${book ? book.title : 'Unknown'}</td>
+                    <td>${transaction.issueDate}</td>
+                    <td>${transaction.dueDate}</td>
+                    <td>${transaction.returnDate || '-'}</td>
+                    <td><span style="color: ${transaction.status === 'Returned' ? 'green' : 'orange'}">${transaction.status}</span></td>
+                    <td>
+                        ${transaction.status === 'Issued' ? 
+                            `<button class="btn" onclick="returnBook(${transaction.id})">Return</button>` : 
+                            '-'
+                        }
+                    </td>
+                `;
+            });
+        }
+
+        function returnBook(transactionId) {
+            const transaction = libraryData.transactions.find(t => t.id === transactionId);
+            if (transaction) {
+                transaction.returnDate = new Date().toISOString().split('T')[0];
+                transaction.status = 'Returned';
+                
+                // Update book status
+                const book = libraryData.books.find(b => b.id === transaction.bookId);
+                if (book) book.status = 'Available';
+                
+                displayTransactions();
+                updateTransactionSelects();
+                updateDashboard();
+                showAlert('Book returned successfully!');
+            }
+        }
+
+        // Dashboard
+        function updateDashboard() {
+            document.getElementById('totalBooks').textContent = libraryData.books.length;
+            document.getElementById('totalMembers').textContent = libraryData.members.length;
+            document.getElementById('booksIssued').textContent = 
+                libraryData.transactions.filter(t => t.status === 'Issued').length;
+            
+            // Calculate overdue books
+            const today = new Date().toISOString().split('T')[0];
+            const overdueCount = libraryData.transactions.filter(t => 
+                t.status === 'Issued' && t.dueDate < today
+            ).length;
+            document.getElementById('overdueBooks').textContent = overdueCount;
+        }
+
+        // Reports
+        function generateReports() {
+            // Books by Category
+            const categoryCount = {};
+            libraryData.books.forEach(book => {
+                categoryCount[book.category] = (categoryCount[book.category] || 0) + 1;
+            });
+            
+            let categoryReport = '';
+            for (const [category, count] of Object.entries(categoryCount)) {
+                categoryReport += `<div>${category}: ${count}</div>`;
+            }
+            document.getElementById('categoryReport').innerHTML = categoryReport || 'No data';
+            
+            // Member Statistics
+            const memberTypeCount = {};
+            libraryData.members.forEach(member => {
+                memberTypeCount[member.type] = (memberTypeCount[member.type] || 0) + 1;
+            });
+            
+            let memberReport = '';
+            for (const [type, count] of Object.entries(memberTypeCount)) {
+                memberReport += `<div>${type}: ${count}</div>`;
+            }
+            document.getElementById('memberReport').innerHTML = memberReport || 'No data';
+            
+            // Popular Books (most issued)
+            const bookIssueCount = {};
+            libraryData.transactions.forEach(transaction => {
+                const book = libraryData.books.find(b => b.id === transaction.bookId);
+                if (book) {
+                    bookIssueCount[book.title] = (bookIssueCount[book.title] || 0) + 1;
+                }
+            });
+            
+            const popularBooks = Object.entries(bookIssueCount)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 3);
+            
+            let popularReport = '';
+            popularBooks.forEach(([title, count]) => {
+                popularReport += `<div>${title}: ${count} times</div>`;
+            });
+            document.getElementById('popularBooks').innerHTML = popularReport || 'No data';
+            
+            // Overdue Report
+            const today = new Date().toISOString().split('T')[0];
+            const overdueTransactions = libraryData.transactions.filter(t => 
+                t.status === 'Issued' && t.dueDate < today
+            );
+            
+            let overdueReport = '';
+            overdueTransactions.forEach(transaction => {
+                const member = libraryData.members.find(m => m.id === transaction.memberId);
+                const book = libraryData.books.find(b => b.id === transaction.bookId);
+                overdueReport += `<div>${member?.name}: ${book?.title}</div>`;
+            });
+            document.getElementById('overdueReport').innerHTML = overdueReport || 'No overdue books';
+        }
+
+        // Search functionality
+        document.getElementById('bookSearch').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#booksTable tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        document.getElementById('memberSearch').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#membersTable tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Set default dates for transaction form
+        document.getElementById('issueDate').valueAsDate = new Date();
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 14); // 2 weeks from today
+        document.getElementById('dueDate').valueAsDate = dueDate;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSampleData();
+            updateDashboard();
+            displayBooks();
+            displayMembers();
+            displayTransactions();
+            updateTransactionSelects();
+            generateReports();
+        });
+    </script>
+</body>
+</html>
